@@ -3,97 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Light Control</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap">
+    <title>Light Control</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        :root {
-            --primary: #4CAF50;
-            --background: rgba(255, 255, 255, 0.2);
-            --border: rgba(255, 255, 255, 0.3);
-            --shadow: rgba(0, 0, 0, 0.1);
-            --text: #ffffff;
-            --text-dark: #2C3E50;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #2C3E50, #4CAF50);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        h2 {
             text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:first-of-type {
+            background-color: #2ecc71;
+        }
+        
+        button:first-of-type:hover {
+            background-color: #27ae60;
+        }
+        
+        button:last-of-type {
+            background-color: #e74c3c;
+        }
+        
+        button:last-of-type:hover {
+            background-color: #c0392b;
+        }
+        
+        p#status {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         .container {
-            background: var(--background);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px var(--shadow);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            width: 300px;
-        }
-        
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-        
-        .toggle-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
-        
-        .status {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        
-        .toggle-button {
-            width: 50px;
-            height: 25px;
-            background: #ccc;
-            border-radius: 50px;
-            position: relative;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        
-        .toggle-button::before {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #ffffff;
-            border-radius: 50%;
-            top: 50%;
-            left: 5px;
-            transform: translateY(-50%);
-            transition: 0.3s;
-        }
-        
-        .toggle-button.on {
-            background: var(--primary);
-        }
-        
-        .toggle-button.on::before {
-            left: calc(100% - 25px);
-        }
-        
-        .indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+    </style>
+</head>
+<body>
+    <h2>Light Control</h2>
+    <div class="container">
+        <button onclick="sendCommand('ON')">Turn ON</button>
+        <button onclick="sendCommand('OFF')">Turn OFF</button>
+    </div>
+    <p id="status">Light status: UNKNOWN</p>
 
+    <script>
+        const broker = "ws://157.173.101.159:9001"; // WebSocket port
+        const topic = "/student_group/light_control";
+        const client = mqtt.connect(broker);
+        
+        client.on("connect", function () {
+            console.log("Connected to MQTT broker");
+            client.subscribe(topic);
+        });
+        
+        client.on("message", function (topic, message) {
+            const status = message.toString();
+            document.getElementById("status").innerText = "Light status: " + status;
+        });
+
+        function sendCommand(command) {
+            client.publish(topic, command);
+            console.log("Sent command: " + command);
+        }
+    </script>
+</body>
 </html>
